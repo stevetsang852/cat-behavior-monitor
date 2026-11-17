@@ -1,0 +1,54 @@
+[
+  {
+    "id": "frigate-mqtt-in",
+    "type": "mqtt in",
+    "z": "demo-flow",
+    "name": "Frigate Events",
+    "topic": "frigate/events",
+    "qos": "0",
+    "datatype": "json",
+    "broker": "local-mqtt",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 140,
+    "y": 100,
+    "wires": [["filter-cat-zone"]]
+  },
+  {
+    "id": "filter-cat-zone",
+    "type": "function",
+    "z": "demo-flow",
+    "name": "Filter Cat in Zone",
+    "func": "const event = msg.payload;\nif (event.type === 'new' && event.after.label === 'cat') {\n  const zones = event.after.current_zones || [];\n  if (zones.includes('food_zone')) {\n    msg.payload = '🐱 貓進入食碗區 - 可能正在吃飯';\n    return [msg, null];\n  } else if (zones.includes('litter_zone')) {\n    msg.payload = '🚽 貓進入貓砂盆區 - 可能正在上廁所';\n    return [null, msg];\n  }\n}\nreturn [null, null];",
+    "outputs": 2,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 380,
+    "y": 100,
+    "wires": [["telegram-eating"], ["telegram-litter"]]
+  },
+  {
+    "id": "telegram-eating",
+    "type": "telegram sender",
+    "z": "demo-flow",
+    "name": "Notify Eating",
+    "bot": "telegram-bot",
+    "x": 620,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "telegram-litter",
+    "type": "telegram sender",
+    "z": "demo-flow",
+    "name": "Notify Litter",
+    "bot": "telegram-bot",
+    "x": 620,
+    "y": 140,
+    "wires": []
+  }
+]
